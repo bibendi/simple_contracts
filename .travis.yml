@@ -1,5 +1,18 @@
-sudo: false
-language: ruby
-rvm:
-  - "2.4"
-before_install: gem install bundler
+sudo: require
+
+env:
+  - DIP_VERSION=2.0.0
+
+services:
+  - docker
+
+install:
+  - curl -L https://github.com/bibendi/dip/releases/download/${DIP_VERSION}/dip-`uname -s`-`uname -m` > dip
+  - chmod +x dip
+  - sudo mv dip /usr/local/bin
+
+before_script:
+  - dip provision
+
+script:
+  - dip rspec
