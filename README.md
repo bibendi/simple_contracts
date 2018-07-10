@@ -1,3 +1,5 @@
+[![Build Status](https://travis-ci.com/bibendi/simple_contracts.svg?branch=master)](https://travis-ci.com/bibendi/simple_contracts)
+
 # SimpleContracts
 
 ## Plain Old Ruby Object Implementation of Contract

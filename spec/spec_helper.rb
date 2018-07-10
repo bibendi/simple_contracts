@@ -1,4 +1,5 @@
 require "bundler/setup"
+require "pry-byebug"
 require "simple_contracts"
 
 RSpec.configure do |config|
