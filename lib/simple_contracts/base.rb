@@ -1,5 +1,7 @@
 # frozen_string_literal: true
 
+require 'celluloid/current'
+
 # Base class for writting contracts.
 # the only public method is SimpleContracts::Base#call (or alias SimpleContracts::Base#match!)
 #
@@ -23,6 +25,8 @@ module SimpleContracts
   class ExpectationsError < StandardError; end
 
   class Base
+    include ::Celluloid
+
     class << self
       def call(*args, **kwargs)
         new.call(*args, **kwargs) { yield }
@@ -36,15 +40,23 @@ module SimpleContracts
         @expectations ||= methods_with_prefix("expect_")
       end
 
+      def parallel_check?(method_name)
+        method_name.end_with?("_async")
+      end
+
       private
 
       def methods_with_prefix(prefix)
         private_instance_methods.
-          select { |method_name| method_name.to_s.start_with?(prefix) }
+          each_with_object([]) do |method_name, memo|
+            method_name = method_name.to_s
+            next unless method_name.start_with?(prefix)
+            memo << method_name
+          end
       end
     end
 
-    def call(*args, **kwargs)
+    def call(*args, logger: STDOUT, **kwargs)
       @input = {args: args, kwargs: kwargs}
       @meta = {checked: []}
       @output = yield
@@ -54,8 +66,7 @@ module SimpleContracts
     rescue GuaranteesError, ExpectationsError
       raise
     rescue StandardError => error
-      # TODO: use logger here
-      puts "Unexpected error #{error}, meta: #{@meta.inspect}"
+      logger.error("Unexpected error #{error}, meta: #{@meta.inspect}") if logger
       raise
     end
 
@@ -64,21 +75,49 @@ module SimpleContracts
     private
 
     def match_guarantees!
-      return if self.class.guarantees_methods.all? do |method_name|
+      result = true
+      futures = []
+      methods = self.class.guarantees_methods
+      return if methods.empty?
+
+      methods.each do |method_name|
         @meta[:checked] << method_name
-        send(method_name)
+
+        if self.class.parallel_check?(method_name)
+          futures << future.send(method_name)
+        else
+          result &&= send(method_name)
+        end
+
+        break unless result
       end
 
-      raise GuaranteesError, @meta
+      return if result && (futures.empty? || futures.all?(&:value))
+
+      abort GuaranteesError.new(@meta)
     end
 
     def match_expectations!
-      return if self.class.expectations_methods.any? do |method_name|
+      result = false
+      futures = []
+      methods = self.class.expectations_methods
+      return if methods.empty?
+
+      methods.each do |method_name|
         @meta[:checked] << method_name
-        send(method_name)
+
+        if self.class.parallel_check?(method_name)
+          futures << future.send(method_name)
+        else
+          result ||= send(method_name)
+        end
+
+        break if result
       end
 
-      raise ExpectationsError, @meta
+      return if result || futures.any?(&:value)
+
+      abort ExpectationsError.new(@meta)
     end
   end
 end

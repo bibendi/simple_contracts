@@ -1,8 +1,8 @@
-version: '1'
+version: '2'
 
 environment:
-  DOCKER_RUBY_VERSION: 2.2
-  RUBY_IMAGE_TAG: 2-alpine
+  DOCKER_RUBY_VERSION: 2.5
+  RUBY_IMAGE_TAG: 2.5
   COMPOSE_FILE_EXT: local_volumes
   RAILS_ENV: test
 
