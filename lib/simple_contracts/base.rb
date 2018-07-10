@@ -56,7 +56,7 @@ module SimpleContracts
       end
     end
 
-    def call(*args, logger: STDOUT, **kwargs)
+    def call(*args, logger: ::Logger.new(STDOUT), **kwargs)
       @input = {args: args, kwargs: kwargs}
       @meta = {checked: []}
       @output = yield
