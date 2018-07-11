@@ -19,6 +19,10 @@ interaction:
     service: app
     command: bundle
 
+  console:
+    service: app
+    command: ./bin/console
+
   rspec:
     service: app
     command: bundle exec rspec

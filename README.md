@@ -36,7 +36,40 @@ Or install it yourself as:
 
 ## Usage
 
-TODO: Write usage instructions here
+```ruby
+  class TwitterContract < SimpleContracts::Base
+    def initialize(post)
+      super
+      @post = post
+    end
+
+    private
+
+    def guarantee_verified_delete
+      return true if Twitter::REST::Client.statuses(@post.tweet_id).empty?
+      false
+    end
+
+    def expect_some_action1
+      ...
+    end
+
+    def expect_some_action2
+      ...
+    end
+
+    # ... other rules
+  end
+
+  @post = Post.find(params.require(:post_id))
+
+  # Use synchronously, (raises exception, "Fails Fast"™):
+  TwitterContract.(@post, async: false) { TwitterAPI.destroy(@post) }
+
+  # Use asynchronously (does not affect TwitterAPI.destroy,
+  # but tracks any problems with TwitterContract validation)
+  TwitterContract.(@post) { TwitterAPI.destroy(@post) }
+```
 
 ## Contributing
 

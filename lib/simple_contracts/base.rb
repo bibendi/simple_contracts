@@ -1,6 +1,10 @@
 # frozen_string_literal: true
 
-require 'celluloid/current'
+require 'concurrent/future'
+require 'logger'
+
+require 'simple_contracts/sampler'
+require 'simple_contracts/statistics'
 
 # Base class for writting contracts.
 # the only public method is SimpleContracts::Base#call (or alias SimpleContracts::Base#match!)
@@ -25,11 +29,9 @@ module SimpleContracts
   class ExpectationsError < StandardError; end
 
   class Base
-    include ::Celluloid
-
     class << self
       def call(*args, **kwargs)
-        new.call(*args, **kwargs) { yield }
+        new(*args, **kwargs).call { yield }
       end
 
       def guarantees_methods
@@ -40,10 +42,6 @@ module SimpleContracts
         @expectations ||= methods_with_prefix("expect_")
       end
 
-      def parallel_check?(method_name)
-        method_name.end_with?("_async")
-      end
-
       private
 
       def methods_with_prefix(prefix)
@@ -52,72 +50,136 @@ module SimpleContracts
             method_name = method_name.to_s
             next unless method_name.start_with?(prefix)
             memo << method_name
-          end
+          end.sort
       end
     end
 
-    def call(*args, logger: ::Logger.new(STDOUT), **kwargs)
+    def initialize(*args, async: nil, logger: nil, sampler: nil, stats: nil, **kwargs)
+      @async = async.nil? ? default_async : !!async
+      @sampler = sampler
+      @stats = stats
+      @logger = logger
       @input = {args: args, kwargs: kwargs}
-      @meta = {checked: []}
-      @output = yield
+      @meta = {checked: [], input: @input}
+    end
 
-      match_guarantees!
-      match_expectations!
-    rescue GuaranteesError, ExpectationsError
-      raise
-    rescue StandardError => error
-      logger.error("Unexpected error #{error}, meta: #{@meta.inspect}") if logger
-      raise
+    def call
+      return yield unless enabled?
+      @output = yield
+      @async ? verify_async : verify
+      @output
     end
 
     alias match! call
 
+    def serialize
+      Marshal.dump(input: @input, output: @output, meta: @meta)
+    end
+
+    def deserialize(state_dump)
+      Marshal.load(state_dump)
+    end
+
+    def contract_name
+      self.class.name
+    end
+
     private
 
+    def default_async
+      true
+    end
+
+    def concurrent_options
+      {}
+    end
+
+    def call_matchers
+      match_guarantees!
+      match_expectations!
+    end
+
+    def verify
+      call_matchers
+    rescue StandardError => error
+      observe_errors(Time.now, nil, error)
+      raise
+    end
+
+    def verify_async
+      execute_async { call_matchers }
+    end
+
+    def execute_async
+      ::Concurrent::Future.
+        execute(concurrent_options) { yield }.
+        add_observer(self, :observe_errors)
+    end
+
+    def observe_errors(_time, _value, reason)
+      return unless reason
+
+      error = nil
+      rule = case reason
+             when GuaranteesError
+               :guarantee_failure
+             when ExpectationsError
+               :expectation_failure
+             else
+               error = reason
+               :unexpected_error
+             end
+
+      keep_meta(rule, error)
+    rescue StandardError => error
+      logger.error(error)
+      raise
+    end
+
+    def keep_meta(rule, error = nil)
+      sample_path = sampler.sample!(rule)
+      meta = sample_path ? @meta.merge(sample_path: sample_path) : @meta
+      stats.log(rule, meta, error)
+    end
+
+    def sampler
+      @sampler ||= ::SimpleContracts::Sampler.new(self)
+    end
+
+    def stats
+      @stats ||= ::SimpleContracts::Statistics.new(contract_name, logger: logger)
+    end
+
+    def logger
+      @logger ||= ::Logger.new(STDOUT)
+    end
+
+    def enabled?
+      ENV["ENABLE_#{self.class.name}"].to_s != 'false'
+    end
+
     def match_guarantees!
-      result = true
-      futures = []
       methods = self.class.guarantees_methods
       return if methods.empty?
-
-      methods.each do |method_name|
+      return if methods.all? do |method_name|
         @meta[:checked] << method_name
-
-        if self.class.parallel_check?(method_name)
-          futures << future.send(method_name)
-        else
-          result &&= send(method_name)
-        end
-
-        break unless result
+        !!send(method_name)
       end
 
-      return if result && (futures.empty? || futures.all?(&:value))
-
-      abort GuaranteesError.new(@meta)
+      raise GuaranteesError, @meta
     end
 
     def match_expectations!
-      result = false
-      futures = []
       methods = self.class.expectations_methods
       return if methods.empty?
-
-      methods.each do |method_name|
+      return if methods.any? do |method_name|
         @meta[:checked] << method_name
-
-        if self.class.parallel_check?(method_name)
-          futures << future.send(method_name)
-        else
-          result ||= send(method_name)
-        end
-
-        break if result
+        next unless !!send(method_name)
+        keep_meta(method_name)
+        true
       end
 
-      return if result || futures.any?(&:value)
-
-      abort ExpectationsError.new(@meta)
+      raise ExpectationsError, @meta
     end
   end
 end
