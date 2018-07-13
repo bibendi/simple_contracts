@@ -35,11 +35,11 @@ module SimpleContracts
       end
 
       def guarantees_methods
-        @guarantees ||= methods_with_prefix("guarantee_")
+        @guarantees_methods ||= methods_with_prefix("guarantee_")
       end
 
       def expectations_methods
-        @expectations ||= methods_with_prefix("expect_")
+        @expectations_methods ||= methods_with_prefix("expect_")
       end
 
       private
@@ -119,21 +119,24 @@ module SimpleContracts
     def observe_errors(_time, _value, reason)
       return unless reason
 
-      error = nil
-      rule = case reason
-             when GuaranteesError
-               :guarantee_failure
-             when ExpectationsError
-               :expectation_failure
-             else
-               error = reason
-               :unexpected_error
-             end
+      rule = rule_from_error(reason)
+      error = reason if rule == :unexpected_error
 
       keep_meta(rule, error)
     rescue StandardError => error
       logger.error(error)
       raise
+    end
+
+    def rule_from_error(error)
+      case error
+      when GuaranteesError
+        :guarantee_failure
+      when ExpectationsError
+        :expectation_failure
+      else
+        :unexpected_error
+      end
     end
 
     def keep_meta(rule, error = nil)

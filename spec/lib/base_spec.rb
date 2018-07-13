@@ -1,8 +1,10 @@
+# frozen_string_literal: true
+
 RSpec.describe SimpleContracts::Base do
-  let(:contract_kwargs) { Hash.new }
+  let(:contract_kwargs) { {} }
   let(:logger) { spy('logger') }
   let(:stats) { double("stats") }
-  let(:call_contract) { contract.(logger: logger, stats: stats, **contract_kwargs) { true } }
+  let(:call_contract) { contract.call(logger: logger, stats: stats, **contract_kwargs) { true } }
 
   before { FileUtils.rm_rf(File.join('/tmp', 'contracts')) }
 

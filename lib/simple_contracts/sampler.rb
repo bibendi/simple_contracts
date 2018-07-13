@@ -2,7 +2,7 @@
 
 module SimpleContracts
   class Sampler
-    PATH_TEMPLATE = "%<contract_name>s/%<rule>s/%<period>i.dump".freeze
+    PATH_TEMPLATE = "%<contract_name>s/%<rule>s/%<period>i.dump"
     DEFAULT_PERIOD_SIZE = 60 * 60 # every hour
 
     def initialize(contract, period_size: nil)

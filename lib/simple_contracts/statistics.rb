@@ -5,7 +5,7 @@ require 'logger'
 
 module SimpleContracts
   class Statistics
-    TEMPLATE = "[contracts-match] %<payload>s;".freeze
+    TEMPLATE = "[contracts-match] %<payload>s;"
 
     def initialize(contract_name, logger: nil)
       @contract_name = contract_name

@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 RSpec.describe SimpleContracts::Sampler do
   let(:sampler) { described_class.new(contract) }
 

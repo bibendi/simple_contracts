@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 RSpec.describe SimpleContracts::Statistics do
   let(:stats) { described_class.new('contract', logger: logger) }
   let(:logger) { spy("logger") }

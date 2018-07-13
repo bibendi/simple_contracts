@@ -27,6 +27,10 @@ interaction:
     service: app
     command: bundle exec rspec
 
+  rubocop:
+    service: app
+    command: bundle exec rubocop
+
   clean:
     service: app
     command: rm -f Gemfile.lock
