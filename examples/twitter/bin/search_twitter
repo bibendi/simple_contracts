@@ -1,0 +1,18 @@
+#!/usr/bin/env ruby
+# frozen_string_literal: true
+
+require_relative '../cli'
+
+cli = Cli.new
+
+loop do
+  cli.ask_credentials
+
+  puts "Enter TwitterSearch query:"
+  search_query = gets.chomp
+
+  cli.search(search_query) if search_query.to_s.size > 3
+  puts "\n\n"
+  puts "Press any key to continue (or `q` to exit)..."
+  exit(0) if STDIN.getch.casecmp?('q')
+end

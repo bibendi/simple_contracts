@@ -6,7 +6,5 @@ services:
     environment:
       - BUNDLE_PATH=/bundle/$DOCKER_RUBY_VERSION
       - BUNDLE_CONFIG=/app/.bundle/config
-      - RAILS_ENV=$RAILS_ENV
     command: bash
     working_dir: /app
-      

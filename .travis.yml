@@ -12,6 +12,7 @@ install:
   - sudo mv dip /usr/local/bin
 
 before_script:
+  - unset BUNDLE_GEMFILE
   - dip provision
 
 script:
