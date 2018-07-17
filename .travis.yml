@@ -12,7 +12,9 @@ install:
   - sudo mv dip /usr/local/bin
 
 before_script:
+  - unset BUNDLE_GEMFILE
   - dip provision
 
 script:
   - dip rspec
+  - dip rubocop

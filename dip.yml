@@ -4,7 +4,7 @@ environment:
   DOCKER_RUBY_VERSION: 2.5
   RUBY_IMAGE_TAG: 2.5
   COMPOSE_FILE_EXT: local_volumes
-  RAILS_ENV: test
+  BUNDLE_GEMFILE: /app/Gemfile
 
 compose:
   files:
@@ -19,13 +19,31 @@ interaction:
     service: app
     command: bundle
 
+  console:
+    service: app
+    command: ./bin/console
+
   rspec:
     service: app
     command: bundle exec rspec
 
+  rubocop:
+    service: app
+    command: bundle exec rubocop
+
   clean:
     service: app
-    command: rm -f Gemfile.lock
+    command: rm -rf Gemfile.lock examples/twitter/Gemfile.lock tmp/
+
+  twitter:
+    service: app
+    environment:
+      BUNDLE_GEMFILE: /app/examples/twitter/Gemfile
+    subcommands:
+      provision:
+        command: bundle install
+      cli:
+        command: bundle exec ./examples/twitter/bin/search_twitter
 
 provision:
   - docker volume create --name bundler_data

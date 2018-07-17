@@ -1,0 +1,14 @@
+#!/usr/bin/env ruby
+# frozen_string_literal: true
+
+require 'bundler/setup'
+require 'pry'
+require 'simple_contracts'
+
+root_path = File.expand_path(File.join('..', '..'), __FILE__)
+
+# Configure gem
+ENV["CONTRACT_ROOT_PATH"] = File.join(root_path, 'tmp', 'contracts')
+
+Pry.config.history.file = File.join(root_path, '.pry_history')
+Pry.start

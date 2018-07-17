@@ -1,6 +1,15 @@
+# frozen_string_literal: true
+
 require "bundler/setup"
+
+require 'simplecov'
+SimpleCov.start do
+  minimum_coverage 97
+end
+
 require "pry-byebug"
 require "simple_contracts"
+require "timecop"
 
 RSpec.configure do |config|
   # Enable flags like --only-failures and --next-failure

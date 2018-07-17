@@ -1,4 +1,6 @@
-lib = File.expand_path("../lib", __FILE__)
+# frozen_string_literal: true
+
+lib = File.expand_path('lib', __dir__)
 $LOAD_PATH.unshift(lib) unless $LOAD_PATH.include?(lib)
 require "simple_contracts/version"
 
@@ -27,11 +29,14 @@ Gem::Specification.new do |spec|
   spec.executables   = spec.files.grep(%r{^exe/}) { |f| File.basename(f) }
   spec.require_paths = ["lib"]
 
-  spec.add_runtime_dependency "celluloid", "~> 0.17"
+  spec.add_runtime_dependency "concurrent-ruby", "~> 1.0"
 
   spec.add_development_dependency "bundler", "~> 1.7"
   spec.add_development_dependency "pry-byebug", "~> 3"
   spec.add_development_dependency "rake", "~> 10.0"
   spec.add_development_dependency "rspec", "~> 3.0"
+  spec.add_development_dependency "rubocop", "~> 0.58"
+  spec.add_development_dependency "simplecov", '~> 0.16'
   spec.add_development_dependency "test-unit", "~> 3"
+  spec.add_development_dependency "timecop", "~> 0.9"
 end
