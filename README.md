@@ -13,7 +13,7 @@ So, Contract is a class with the only public method , that validates some action
  - Expectations - list of all expected states that COULD be valid for the behavior check
 
 Contract validates, that:
- - ALL Guarantees were met
+ - ALL Guarantees were met.
  - AT LEAST ONE Expectations was met
 
 Otherwise, Contract raises an exception with details, at least on what step behavior was broken.
