@@ -1,18 +1,14 @@
 version: '2'
 
 environment:
-  DOCKER_RUBY_VERSION: 2.5
-  RUBY_IMAGE_TAG: 2.5
-  COMPOSE_FILE_EXT: local_volumes
   BUNDLE_GEMFILE: /app/Gemfile
 
 compose:
   files:
     - docker-compose.yml
-    - docker-compose.${COMPOSE_FILE_EXT}.yml
 
 interaction:
-  sh:
+  bash:
     service: app
 
   bundle:
@@ -46,6 +42,5 @@ interaction:
         command: bundle exec ./examples/twitter/bin/search_twitter
 
 provision:
-  - docker volume create --name bundler_data
   - dip clean
   - dip bundle install

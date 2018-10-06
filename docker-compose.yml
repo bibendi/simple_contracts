@@ -1,10 +1,16 @@
-version: '2'
+version: '3.4'
 
 services:
   app:
-    image: ruby:$RUBY_IMAGE_TAG
+    image: ruby:2.5.1
     environment:
-      - BUNDLE_PATH=/bundle/$DOCKER_RUBY_VERSION
+      - BUNDLE_PATH=/bundle
       - BUNDLE_CONFIG=/app/.bundle/config
     command: bash
     working_dir: /app
+    volumes:
+      - .:/app
+      - bundler_data:/bundle
+
+volumes:
+  bundler_data:
