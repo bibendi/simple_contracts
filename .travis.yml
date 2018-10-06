@@ -1,15 +1,10 @@
 sudo: require
 
-env:
-  - DIP_VERSION=2.0.0
-
 services:
   - docker
 
 install:
-  - curl -L https://github.com/bibendi/dip/releases/download/${DIP_VERSION}/dip-`uname -s`-`uname -m` > dip
-  - chmod +x dip
-  - sudo mv dip /usr/local/bin
+  - gem install dip
 
 before_script:
   - unset BUNDLE_GEMFILE
