@@ -49,6 +49,7 @@ module SimpleContracts
           each_with_object([]) do |method_name, memo|
             method_name = method_name.to_s
             next unless method_name.start_with?(prefix)
+
             memo << method_name
           end.sort
       end
@@ -65,6 +66,7 @@ module SimpleContracts
 
     def call
       return yield unless enabled?
+
       @output = yield
       @async ? verify_async : verify
       @output
@@ -175,9 +177,11 @@ module SimpleContracts
     def match_expectations!
       methods = self.class.expectations_methods
       return if methods.empty?
+
       return if methods.any? do |method_name|
         @meta[:checked] << method_name
         next unless !!send(method_name)
+
         keep_meta(method_name)
         true
       end

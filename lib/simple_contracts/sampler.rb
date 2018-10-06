@@ -14,7 +14,9 @@ module SimpleContracts
     def sample!(rule)
       path = sample_path(rule)
       return unless need_sample?(path)
+
       capture(rule)
+
       path
     end
 
@@ -29,6 +31,7 @@ module SimpleContracts
     def read(path = nil, rule: nil, period: nil)
       path ||= sample_path(rule, period)
       raise(ArgumentError, "Sample path should be defined") unless path
+
       @context.deserialize(File.read(path))
     end
 
