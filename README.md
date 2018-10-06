@@ -1,4 +1,5 @@
 [![Build Status](https://travis-ci.com/bibendi/simple_contracts.svg?branch=master)](https://travis-ci.com/bibendi/simple_contracts)
+[![Cult Of Martians](http://cultofmartians.com/assets/badges/badge.svg)](https://cultofmartians.com/tasks/simple-contracts.html)
 
 # SimpleContracts
 
