@@ -1,4 +1,4 @@
-[![Build Status](https://travis-ci.com/bibendi/simple_contracts.svg?branch=master)](https://travis-ci.com/bibendi/simple_contracts)
+[![Build Status](https://travis-ci.org/bibendi/simple_contracts.svg?branch=master)](https://travis-ci.org/bibendi/simple_contracts)
 [![Maintainability](https://api.codeclimate.com/v1/badges/7bbb13403a539b107863/maintainability)](https://codeclimate.com/github/bibendi/simple_contracts/maintainability)
 [![Cult Of Martians](http://cultofmartians.com/assets/badges/badge.svg)](https://cultofmartians.com/tasks/simple-contracts.html)
 

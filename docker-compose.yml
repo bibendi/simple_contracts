@@ -9,8 +9,10 @@ services:
     command: bash
     working_dir: /app
     volumes:
-      - .:/app
+      - .:/app:cached
       - bundler_data:/bundle
+    tmpfs:
+      - /tmp
 
 volumes:
   bundler_data:
