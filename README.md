@@ -4,6 +4,9 @@
 
 # SimpleContracts
 
+<a href="https://evilmartians.com/?utm_source=simple_contracts">
+<img src="https://evilmartians.com/badges/sponsored-by-evil-martians.svg" alt="Sponsored by Evil Martians" width="236" height="54"></a>
+
 ## Plain Old Ruby Object Implementation of Contract
 
 This project contains the most simple implementation of Contract written in Ruby (and maybe later in other languages).
